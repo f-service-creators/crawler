@@ -19,7 +19,7 @@ jobs:
           node-version: "12"
 
       - name: Build
-        run: yarn install && yarn run Build
+        run: yarn install && yarn build
         working-directory: functions
 
       - name: GitHub Action for Firebase Functions deploy
