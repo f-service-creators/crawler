@@ -29,12 +29,13 @@ export const crawlByApi = functions.region("asia-northeast1")
 
       let params: Record<string, string>;
       if (typeof keywords === "string") {
-        params = { limit: "10", keywords: keywords };
+        params = { limit: "100", keywords: keywords };
       } else {
-        params = { limit: "10" };
+        params = { limit: "100" };
       }
 
       const query = new URLSearchParams(params);
+      console.log("before fetch")
       try {
         const res = await fetch(`https://jirei-seido-api.mirasapo-plus.go.jp/supports?${query}`, {
           method: "GET",
@@ -43,9 +44,11 @@ export const crawlByApi = functions.region("asia-northeast1")
             "Content-Type": "application/json",
           },
         });
-
+        console.log("after fetch")
         if (res.ok) {
-          response.json = await res.json();
+          const resJson = await res.json();
+          console.log(JSON.stringify(resJson));
+          response.json(resJson)
         } else {
           throw new Error("Response is NG");
         }
