@@ -65,7 +65,12 @@ const crawlSite = async (offset: string) => {
                                 .doc(item.id)
                                 .set(targetContent)
                         })
-                    )
+                    ).catch((error) => {
+                        functions.logger.error(
+                            "Error occur in writing to firestore. error msg is : ",
+                            error
+                        )
+                    })
                     functions.logger.info(
                         "total data size is ",
                         String(original.total)
@@ -122,14 +127,17 @@ export const crawlByApi = functions
         response.json(res)
     })
 
-export const crawlByStoreWrite = functions.firestore
-    .document("crawler-target/{offset}")
+export const crawlByStoreWrite = functions
+    .region("asia-northeast1")
+    .firestore.document("crawler-target/{offset}")
     .onWrite(async (change, context) => {
         let offset = context.params.offset
         if (typeof offset !== "string") {
             offset = "0"
         }
         await crawlSite(offset)
+        return null
+
         // const res = await crawlSite(offset)
         // functions.logger.debug(`write data ${JSON.stringify(res)}`)
     })
@@ -139,9 +147,11 @@ export const helloWorldCall = functions
         await updateCrawlerTarget()
         response.json({ result: "success" })
     })
-export const scheduledCall = functions.pubsub
-    .schedule("every 24 hours")
+export const scheduledCall = functions
+    .region("asia-northeast1")
+    .pubsub.schedule("every 24 hours")
     .timeZone("Asia/Tokyo")
     .onRun(async () => {
         await updateCrawlerTarget()
+        return null
     })
